@@ -25,73 +25,56 @@ class MainActivity : FragmentActivity() {
 
         if (savedInstanceState == null) {
             if (isAppSaved()) {
+                // If an app is saved, open it directly
                 CheckSiteStatusTask().execute()
             } else {
+                // If no app is saved, open the InstalledAppsFragment
                 openInstalledAppsFragment()
+
             }
         }
     }
 
 
-    private inner class CheckSiteStatusTask : AsyncTask<Void, String, Boolean>() {
-
-        private val HOST = "localhost"
-        private val PORT = 8000
-        private val TIMEOUT_MS = 100
-        private val MAX_ATTEMPTS = 10
-        private val RETRY_DELAY_MS = 3000L
+    private inner class CheckSiteStatusTask : AsyncTask<Void, Void, Boolean>() {
 
         override fun doInBackground(vararg params: Void?): Boolean {
-            if (isSiteReachable(HOST, PORT, TIMEOUT_MS)) {
-                publishProgress("Server is already up ⬆️")
-                return true
-            }
-
-            publishProgress("Server is down ⬇️. Starting server via Termux...")
-            runOnUiThread {
-                openApp("com.termux")
-            }
-
-            for (attempt in 1..MAX_ATTEMPTS) {
-                publishProgress("Waiting for server... (Attempt $attempt/$MAX_ATTEMPTS)")
-                try {
-                    Thread.sleep(RETRY_DELAY_MS)
-                } catch (e: InterruptedException) {
-                    return false
-                }
-
-                if (isSiteReachable(HOST, PORT, TIMEOUT_MS)) {
-                    publishProgress("Server started successfully! ✅")
-                    return true
-                }
-            }
-
-            publishProgress("Server failed to start after $MAX_ATTEMPTS attempts. ❌")
-            return false
-        }
-
-        override fun onProgressUpdate(vararg values: String?) {
-            values[0]?.let { showToast(it) }
+            return isSiteReachable("localhost", 8000, 100)
         }
 
         override fun onPostExecute(result: Boolean) {
             if (result) {
-                showToast("Starting App...")
+                showToast("Server is up ⬆️")
+                showToast("Starting TV2")
                 openSavedApp()
+                // Finish the current activity (exiting sparkletv2 after opening only IPTV)
+                finish()
             } else {
-                showToast("Could not connect to server. Please check Termux.")
+                showToast("Server is down ⬇️")
+
+                openApp("com.termux")
+
+                // Wait for 5.5 seconds before opening the second app
+                Thread.sleep(5500)
+
+                showToast("Starting TV2")
+
+                openSavedApp()
+
+                // Finish the current activity (exiting sparkletv2 after opening T+IPTV)
+                finish()
             }
-            finish()
         }
     }
 
 
+
     private fun isSiteReachable(host: String, port: Int, timeout: Int): Boolean {
         return try {
-            Socket().use { socket ->
-                socket.connect(InetSocketAddress(host, port), timeout)
-                true
-            }
+            val socket = Socket()
+            socket.connect(InetSocketAddress(host, port), timeout)
+            socket.close()
+            true
         } catch (e: IOException) {
             false
         }
@@ -111,7 +94,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun openSavedApp() {
-        val savedApp = sharedPreferences.getString("savedAPP", null)
+        val savedApp= sharedPreferences.getString("savedAPP", null)
         savedApp?.let {
             openApp(it)
         }
@@ -126,13 +109,13 @@ class MainActivity : FragmentActivity() {
 
     private fun openApp(pkgName: String) {
         val launchIntent = packageManager.getLaunchIntentForPackage(pkgName)
+        println(pkgName)
         if (launchIntent != null) {
             startActivity(launchIntent)
         } else {
-            showToast("App not found: $pkgName")
             val playStoreIntent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse("market://details?id=$pkgName")
+                Uri.parse("market://details?id=$packageName")
             )
             startActivity(playStoreIntent)
         }
