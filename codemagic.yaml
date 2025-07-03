@@ -1,0 +1,31 @@
+workflows:
+  TV:
+    name: TV
+    instance_type: mac_mini_m2
+
+    environment:
+      java: 17
+      groups:
+        - android-signing
+
+    triggering:
+      events:
+        - push
+
+    scripts:
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
+
+      - name: Build Android App (Release)
+        script: |
+          ./gradlew clean
+          ./gradlew assembleRelease
+          ./gradlew bundleRelease
+
+    artifacts:
+      - app/build/outputs/apk/release/**/*.apk
+      - app/build/outputs/bundle/release/**/*.aab
+      - app/build/outputs/mapping/release/**/*.txt
+      - /tmp/codemagic_logs/*.log
+      
