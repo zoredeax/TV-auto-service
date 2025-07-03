@@ -1,6 +1,6 @@
 workflows:
-  TV:
-    name: TV
+  Teledax:
+    name: Teledax
     instance_type: mac_mini_m2
 
     environment:
@@ -17,6 +17,11 @@ workflows:
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
 
+      # ADD THIS STEP
+      - name: Make gradlew executable
+        script: |
+          chmod +x ./gradlew
+
       - name: Build Android App (Release)
         script: |
           ./gradlew clean
@@ -28,4 +33,3 @@ workflows:
       - app/build/outputs/bundle/release/**/*.aab
       - app/build/outputs/mapping/release/**/*.txt
       - /tmp/codemagic_logs/*.log
-      
