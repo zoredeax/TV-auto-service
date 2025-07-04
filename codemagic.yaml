@@ -5,8 +5,8 @@ workflows:
 
     environment:
       java: 17
-      groups:
-        - android-signing
+      # groups:
+      #   - android-signing # Not strictly needed for debug builds
 
     triggering:
       events:
@@ -17,19 +17,18 @@ workflows:
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
 
-      # ADD THIS STEP
       - name: Make gradlew executable
         script: |
           chmod +x ./gradlew
 
-      - name: Build Android App (Release)
+      - name: Build Android App (Debug)
         script: |
           ./gradlew clean
-          ./gradlew assembleRelease
-          ./gradlew bundleRelease
+          ./gradlew assembleDebug
+          ./gradlew bundleDebug
 
     artifacts:
-      - app/build/outputs/apk/release/**/*.apk
-      - app/build/outputs/bundle/release/**/*.aab
-      - app/build/outputs/mapping/release/**/*.txt
+      - app/build/outputs/apk/debug/**/*.apk
+      - app/build/outputs/bundle/debug/**/*.aab
+      - app/build/outputs/mapping/debug/**/*.txt
       - /tmp/codemagic_logs/*.log
