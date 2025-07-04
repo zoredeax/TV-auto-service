@@ -36,24 +36,24 @@ class MainActivity : FragmentActivity() {
     private inner class CheckSiteStatusTask : AsyncTask<Void, String, Boolean>() {
 
         private val HOST = "localhost"
-        private val PORT = 8000
+        private val PORT = 5001
         private val TIMEOUT_MS = 100
         private val MAX_ATTEMPTS = 10
-        private val RETRY_DELAY_MS = 3000L
+        private val RETRY_DELAY_MS = 6000L
 
         override fun doInBackground(vararg params: Void?): Boolean {
             if (isSiteReachable(HOST, PORT, TIMEOUT_MS)) {
-                publishProgress("Server is already up ⬆️")
+                //publishProgress("Server is already up ⬆️")
                 return true
             }
 
-            publishProgress("Server is down ⬇️. Starting server via Termux...")
+            publishProgress("Server is down ⬇️")
             runOnUiThread {
                 openApp("com.termux")
             }
 
             for (attempt in 1..MAX_ATTEMPTS) {
-                publishProgress("Waiting for server... (Attempt $attempt/$MAX_ATTEMPTS)")
+                publishProgress("Waiting for server to come online ...")
                 try {
                     Thread.sleep(RETRY_DELAY_MS)
                 } catch (e: InterruptedException) {
@@ -76,7 +76,7 @@ class MainActivity : FragmentActivity() {
 
         override fun onPostExecute(result: Boolean) {
             if (result) {
-                showToast("Starting App...")
+                //showToast("Starting App...")
                 openSavedApp()
             } else {
                 showToast("Could not connect to server. Please check Termux.")
