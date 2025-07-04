@@ -45,7 +45,7 @@ class MainActivity : FragmentActivity() {
         private val MAX_ATTEMPTS = 3
 
         override fun doInBackground(vararg params: Void?): Boolean {
-            return isSiteReachable(localhost, 5001, 100)
+            return isSiteReachable("localhost", 5001, 100)
         }
 
         override fun onProgressUpdate(vararg values: String?) {
@@ -78,7 +78,7 @@ class MainActivity : FragmentActivity() {
                             publishProgress("Waiting for server to come online ⬆️...")
                             Thread.sleep(6000)
 
-                            if (isSiteReachable(localhost, 5001, 100)) {
+                            if (isSiteReachable("localhost", 5001, 100)) {
                                 publishProgress("Server started successfully! ✅")
                                 serverCameUp = true
                                 break
